@@ -1,17 +1,20 @@
 use std::rc::Rc;
+use std::cell::RefCell;
 
 struct TemperatureConverter {
-    count: Rc<u32>, // Reference-counted memory
+    count: Rc<RefCell<u32>>, // Reference-counted memory with interior mutability
 }
 
 impl TemperatureConverter {
     fn new() -> Self {
-        TemperatureConverter { count: Rc::new(0) }
+        TemperatureConverter {
+            count: Rc::new(RefCell::new(0)), // Initialize with RefCell
+        }
     }
 
     fn convert(&self, temp: f64, to_celsius: bool) -> (f64, u32) {
-        let mut count = Rc::get_mut(&mut self.count.clone()).unwrap();
-        *count += 1;
+        let mut count = self.count.borrow_mut(); // Borrow mutably
+        *count += 1; // Increment count
 
         let result = if to_celsius {
             (temp - 32.0) * 5.0 / 9.0
